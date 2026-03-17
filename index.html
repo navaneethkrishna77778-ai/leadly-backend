@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Leadly AI — Client Acquisition, Automated.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+  <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    #auth-overlay{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.5rem}
+    #auth-overlay.hidden{display:none}
+    .auth-card{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:2.5rem 2rem;max-width:420px;width:100%;text-align:center;box-shadow:0 0 60px rgba(139,92,246,0.1)}
+    .auth-logo{display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:1.1rem;font-weight:800;letter-spacing:-.03em;margin-bottom:1.75rem}
+    .auth-logo-mark{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:.75rem}
+    .auth-title{font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.5rem}
+    .auth-sub{color:var(--m);font-size:.875rem;margin-bottom:2rem;line-height:1.6}
+    .auth-btn{width:100%;padding:.85rem 1.5rem;border-radius:10px;font-family:var(--f);font-size:.9rem;font-weight:600;cursor:pointer;transition:all .2s;border:none;margin-bottom:.75rem;display:flex;align-items:center;justify-content:center;gap:.6rem}
+    .auth-btn-google{background:#fff;color:#111;box-shadow:0 2px 12px rgba(0,0,0,.3)}
+    .auth-btn-google:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.4)}
+    .auth-btn-email{background:linear-gradient(135deg,#7c3aed,#8b5cf6);color:#fff;box-shadow:0 0 20px rgba(139,92,246,.28)}
+    .auth-btn-email:hover{transform:translateY(-1px);box-shadow:0 0 32px rgba(139,92,246,.5)}
+    .auth-divider{display:flex;align-items:center;gap:.75rem;margin:.25rem 0 .75rem;color:var(--d);font-size:.75rem}
+    .auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+    .auth-note{font-size:.72rem;color:var(--d);margin-top:1rem}
+    #form-overlay{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.5rem;overflow-y:auto}
+    #form-overlay.hidden{display:none}
+    .form-card{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:2.5rem 2rem;max-width:480px;width:100%;box-shadow:0 0 60px rgba(139,92,246,.1)}
+    .form-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem}
+    .form-logo{display:flex;align-items:center;gap:.5rem;font-size:1rem;font-weight:800;letter-spacing:-.03em}
+    .form-logo-mark{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:.65rem}
+    .user-info{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:var(--m)}
+    .user-dot{width:6px;height:6px;border-radius:50%;background:#22c55e}
+    .form-title{font-size:1.4rem;font-weight:800;letter-spacing:-.03em;margin-bottom:.4rem}
+    .form-sub{color:var(--m);font-size:.875rem;margin-bottom:1.75rem;line-height:1.6}
+    .form-group{margin-bottom:1.1rem}
+    .form-label{display:block;font-size:.75rem;font-weight:600;color:var(--m);margin-bottom:.45rem;text-transform:uppercase;letter-spacing:.06em}
+    .form-input,.form-textarea{width:100%;padding:.78rem 1rem;background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:9px;color:var(--w);font-family:var(--f);font-size:.9rem;outline:none;transition:border-color .2s;resize:none}
+    .form-input:focus,.form-textarea:focus{border-color:rgba(139,92,246,.5)}
+    .form-input::placeholder,.form-textarea::placeholder{color:var(--d)}
+    .form-submit{width:100%;padding:.9rem;border-radius:11px;background:linear-gradient(135deg,#7c3aed,#8b5cf6);border:none;color:#fff;font-family:var(--f);font-size:.95rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:.5rem;box-shadow:0 0 24px rgba(139,92,246,.3);letter-spacing:-.01em}
+    .form-submit:hover{transform:translateY(-1px);box-shadow:0 0 36px rgba(139,92,246,.5)}
+    .form-submit:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .logout-btn{background:transparent;border:1px solid var(--border);color:var(--d);padding:.35rem .85rem;border-radius:7px;font-size:.75rem;cursor:pointer;font-family:var(--f);transition:all .2s}
+    .logout-btn:hover{border-color:rgba(139,92,246,.3);color:var(--m)}
+    #success-overlay{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:1.5rem}
+    #success-overlay.hidden{display:none}
+    .success-card{background:var(--card);border:1px solid rgba(139,92,246,.3);border-radius:20px;padding:3rem 2rem;max-width:440px;width:100%;text-align:center;box-shadow:0 0 60px rgba(139,92,246,.12)}
+    .success-icon{width:64px;height:64px;border-radius:50%;background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.25);display:flex;align-items:center;justify-content:center;font-size:1.75rem;margin:0 auto 1.5rem}
+    .success-title{font-size:1.75rem;font-weight:900;letter-spacing:-.04em;margin-bottom:.6rem}
+    .success-sub{color:var(--m);font-size:.9rem;line-height:1.75;margin-bottom:2rem;max-width:320px;margin-left:auto;margin-right:auto}
+    .success-tag{display:inline-flex;align-items:center;gap:.4rem;padding:.3rem .9rem;border:1px solid rgba(139,92,246,.25);border-radius:100px;background:rgba(139,92,246,.06);font-size:.72rem;font-weight:600;color:var(--p2);margin-bottom:1.75rem}
+    .success-dot{width:5px;height:5px;border-radius:50%;background:var(--p);animation:pulse 2s infinite}
+    .back-to-site{background:transparent;border:1px solid var(--border2);color:var(--m);padding:.7rem 1.5rem;border-radius:9px;font-family:var(--f);font-size:.875rem;font-weight:500;cursor:pointer;transition:all .2s}
+    .back-to-site:hover{border-color:rgba(139,92,246,.4);color:var(--w)}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    #nav-auth-btn{display:flex;align-items:center;gap:.5rem}
+  </style>
+</head>
+<body>
+<div id="cur"></div>
+<canvas id="bgcanvas"></canvas>
+<div class="toast" id="toast"><span class="toast-dot"></span><span id="toast-msg"></span></div>
+
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo"><div class="auth-logo-mark">⚡</div>Leadly AI</div>
+    <h2 class="auth-title">Join the Waitlist</h2>
+    <p class="auth-sub">Sign in to save your spot. We'll notify you the moment we launch.</p>
+    <button class="auth-btn auth-btn-google" onclick="loginGoogle()">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+      Continue with Google
+    </button>
+    <div class="auth-divider">or</div>
+    <button class="auth-btn auth-btn-email" onclick="loginEmail()">✉️ Continue with Email</button>
+    <p class="auth-note">By signing up you agree to early access terms. No spam, ever.</p>
+  </div>
+</div>
+
+<div id="form-overlay" class="hidden">
+  <div class="form-card">
+    <div class="form-header">
+      <div class="form-logo"><div class="form-logo-mark">⚡</div>Leadly AI</div>
+      <div style="display:flex;align-items:center;gap:.75rem">
+        <div class="user-info"><span class="user-dot"></span><span id="user-email-display"></span></div>
+        <button class="logout-btn" onclick="logout()">Sign out</button>
+      </div>
+    </div>
+    <h2 class="form-title">Almost there 👋</h2>
+    <p class="form-sub">Tell us about your business so we can personalise your experience when we launch.</p>
+    <div class="form-group">
+      <label class="form-label">Your Niche</label>
+      <input class="form-input" id="niche" type="text" placeholder="e.g. Video editing, Social media management"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">What Do You Do?</label>
+      <textarea class="form-textarea" id="description" rows="3" placeholder="e.g. I create short-form video content for brands..."></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Who Are Your Ideal Clients?</label>
+      <input class="form-input" id="idealClients" type="text" placeholder="e.g. SaaS startups, local restaurants"/>
+    </div>
+    <button class="form-submit" id="submit-btn" onclick="submitWaitlist()">Join Waitlist →</button>
+  </div>
+</div>
+
+<div id="success-overlay" class="hidden">
+  <div class="success-card">
+    <div class="success-icon">🚀</div>
+    <div class="success-tag"><span class="success-dot"></span>Waitlist Confirmed</div>
+    <h2 class="success-title">You're on the list!</h2>
+    <p class="success-sub">We're building something powerful for freelancers and agencies. You'll be the first to know when we launch.</p>
+    <button class="back-to-site" onclick="showSite()">← Back to site</button>
+  </div>
+</div>
+
+<div id="main-site" style="display:none">
+<nav>
+  <div class="logo"><div class="logo-mark">⚡</div>Leadly AI</div>
+  <ul class="nav-links">
+    <li><a href="#pipeline">Pipeline</a></li>
+    <li><a href="#platforms">Platforms</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#faq">FAQ</a></li>
+  </ul>
+  <div id="nav-auth-btn"></div>
+</nav>
+
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-badge"><span class="badge-dot"></span>Private Development — Join the Waitlist</div>
+    <h1>More Clients.<br/>Less Work.<br/><span class="grad">With AI.</span></h1>
+    <p class="hero-sub">Leadly AI scans the internet for your ideal clients, sends personalized outreach automatically, and books calls — so you can focus on doing the work.</p>
+    <div class="hero-ctas">
+      <button class="btn btn-p btn-xl" onclick="showAuth()">Get Early Access →</button>
+      <a href="#pipeline" class="btn btn-ghost btn-xl">See How It Works</a>
+    </div>
+    <div class="for-tags">
+      <span class="for-label">Built for</span>
+      <span class="for-tag">Freelancers</span>
+      <span class="for-tag">Agencies</span>
+      <span class="for-tag">Video Editors</span>
+      <span class="for-tag">Social Media Managers</span>
+      <span class="for-tag">Online Businesses</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+<div class="mystery-bar">
+  <div class="mystery-lbl">Built for modern operators</div>
+  <div class="mystery-tags">
+    <span class="m-tag">Freelancer</span><span class="m-tag">Agency</span><span class="m-tag">Creator</span><span class="m-tag">Brand</span><span class="m-tag">Editor</span><span class="m-tag">Marketer</span>
+  </div>
+</div>
+<div class="divider"></div>
+
+<section id="platforms">
+  <div class="w sec">
+    <div class="eyebrow rv">Data Sources</div>
+    <h2 class="h2 rv d1">Powered by public data<br/>across every platform.</h2>
+    <p class="sub rv d2">Leadly scans where your ideal clients actually are.</p>
+    <div class="plat-grid rv d3">
+      <div class="plat-item"><span class="plat-icon">🎵</span>TikTok</div>
+      <div class="plat-item"><span class="plat-icon">💼</span>LinkedIn</div>
+      <div class="plat-item"><span class="plat-icon">📸</span>Instagram</div>
+      <div class="plat-item"><span class="plat-icon">📘</span>Facebook</div>
+      <div class="plat-item"><span class="plat-icon">🗺️</span>Google Maps</div>
+      <div class="plat-item"><span class="plat-icon">🛍️</span>Shopify Stores</div>
+      <div class="plat-item"><span class="plat-icon">🌐</span>Public Websites</div>
+    </div>
+    <p class="plat-note rv d4">All data is publicly available. No private access. No violations.</p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="pipeline" style="background:var(--bg2)">
+  <div class="w sec">
+    <div class="eyebrow rv">Pipeline</div>
+    <h2 class="h2 rv d1">Five steps.<br/>Zero manual work.</h2>
+    <p class="sub rv d2">From finding leads to booking calls — fully automated.</p>
+    <div class="pipe-outer rv d3">
+      <div class="pipeline">
+        <div class="pipe-track"></div>
+        <div class="pipe-glow"></div>
+        <div class="ps"><div class="ps-node">🎯</div><div class="ps-dot"></div><div class="ps-t">Lead Discovery</div><div class="ps-d">Scans platforms for ideal clients</div></div>
+        <div class="ps"><div class="ps-node">📇</div><div class="ps-dot"></div><div class="ps-t">Contact Collection</div><div class="ps-d">Finds verified emails</div></div>
+        <div class="ps"><div class="ps-node">✍️</div><div class="ps-dot"></div><div class="ps-t">AI Personalization</div><div class="ps-d">Writes unique messages</div></div>
+        <div class="ps"><div class="ps-node">📤</div><div class="ps-dot"></div><div class="ps-t">Automated Outreach</div><div class="ps-d">Sends and handles replies</div></div>
+        <div class="ps"><div class="ps-node">📅</div><div class="ps-dot"></div><div class="ps-t">Call Booking</div><div class="ps-d">Books calls automatically</div></div>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:center">
+      <div class="dev-tag rv d4"><span class="badge-dot"></span>Currently in Development</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="pricing">
+  <div class="w sec">
+    <div class="eyebrow rv">Pricing</div>
+    <h2 class="h2 rv d1">Simple plans.<br/>Revealing at launch.</h2>
+    <p class="sub rv d2">Waitlist members lock in early-adopter pricing.</p>
+    <div class="pricing-grid">
+      <div class="pc rv d1">
+        <div class="pc-tier">Starter</div><div class="pc-name">Solo</div>
+        <div class="pc-desc">For freelancers landing their first clients</div>
+        <ul class="pc-feat">
+          <li><span class="pf-dot"></span>Basic leads / month</li>
+          <li><span class="pf-dot"></span>Standard AI filtering</li>
+          <li><span class="pf-dot"></span>Email outreach</li>
+          <li><span class="pf-dot"></span>2 platforms</li>
+        </ul>
+        <div class="spin-box"><div class="spin-nums spd-fast"><div class="sn">$9</div><div class="sn">$29</div><div class="sn">$9</div><div class="sn">$29</div></div><div class="spin-over"><div class="so-title">Pricing Unlocking Soon</div><div class="so-sub">Private Beta</div></div></div>
+        <div class="coming-soon-pill">⏳ Coming Soon</div>
+        <button class="btn btn-ghost btn-lg" style="width:100%;margin-top:1rem" onclick="showAuth()">Join Waitlist →</button>
+      </div>
+      <div class="pc feat rv d2">
+        <div class="feat-pip">Most Popular</div>
+        <div class="pc-tier" style="margin-top:1.1rem">Pro</div><div class="pc-name">Growth</div>
+        <div class="pc-desc">For agencies scaling client acquisition</div>
+        <ul class="pc-feat">
+          <li><span class="pf-dot"></span>More leads / month</li>
+          <li><span class="pf-dot"></span>Advanced AI personalization</li>
+          <li><span class="pf-dot"></span>Multi-platform scraping</li>
+          <li><span class="pf-dot"></span>Auto-reply handling</li>
+          <li><span class="pf-dot"></span>Priority processing</li>
+        </ul>
+        <div class="spin-box"><div class="spin-nums spd-mid"><div class="sn">$49</div><div class="sn">$89</div><div class="sn">$49</div><div class="sn">$89</div></div><div class="spin-over"><div class="so-title">Pricing Unlocking Soon</div><div class="so-sub">Private Beta</div></div></div>
+        <div class="coming-soon-pill">⏳ Coming Soon</div>
+        <button class="btn btn-p btn-lg" style="width:100%;margin-top:1rem" onclick="showAuth()">Get Early Access →</button>
+      </div>
+      <div class="pc rv d3">
+        <div class="pc-tier">Custom</div><div class="pc-name">Agency</div>
+        <div class="pc-desc">Built for agencies that need a tailored lead engine</div>
+        <ul class="pc-feat">
+          <li><span class="pf-dot"></span>Tailored lead volume</li>
+          <li><span class="pf-dot"></span>Custom workflows</li>
+          <li><span class="pf-dot"></span>Advanced automation</li>
+          <li><span class="pf-dot"></span>All platforms</li>
+          <li><span class="pf-dot"></span>Dedicated support</li>
+        </ul>
+        <div class="spin-box"><div class="spin-nums spd-slow"><div class="sn">$199</div><div class="sn">$499</div><div class="sn">$199</div><div class="sn">$499</div></div><div class="spin-over"><div class="so-title">Pricing Unlocking Soon</div><div class="so-sub">Private Beta</div></div></div>
+        <div class="coming-soon-pill">⏳ Coming Soon</div>
+        <button class="btn btn-ghost btn-lg" style="width:100%;margin-top:1rem" onclick="showAuth()">Request Access →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="faq" style="background:var(--bg2)">
+  <div class="w sec">
+    <div class="eyebrow rv">FAQ</div>
+    <h2 class="h2 rv d1">Questions.</h2>
+    <div class="faq-wrap rv d2">
+      <div class="fq"><button class="fq-q" onclick="tfaq(this)">Who is Leadly AI for?<span class="fq-arr">▾</span></button><div class="fq-body"><p>Leadly AI is built for freelancers, marketing agencies, video editors, social media managers, and any service-based business that needs clients.</p></div></div>
+      <div class="fq"><button class="fq-q" onclick="tfaq(this)">Which platforms does it use?<span class="fq-arr">▾</span></button><div class="fq-body"><p>Leadly scrapes publicly available data from TikTok, LinkedIn, Instagram, Facebook, Google Maps, Shopify stores, and public websites.</p></div></div>
+      <div class="fq"><button class="fq-q" onclick="tfaq(this)">Is the data public?<span class="fq-arr">▾</span></button><div class="fq-body"><p>Yes. Leadly only collects data that individuals and businesses have made publicly visible. We never access private accounts.</p></div></div>
+      <div class="fq"><button class="fq-q" onclick="tfaq(this)">Does it automate outreach?<span class="fq-arr">▾</span></button><div class="fq-body"><p>Yes. The AI writes personalized messages, sends them, handles replies, and books calls — completely automated.</p></div></div>
+      <div class="fq"><button class="fq-q" onclick="tfaq(this)">When will it launch?<span class="fq-arr">▾</span></button><div class="fq-body"><p>Leadly AI is in private development. Waitlist members get early access with founder pricing locked in.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<section id="waitlist-section" class="coming-sec">
+  <div class="cs-glow"></div>
+  <div class="cs-inner rv">
+    <div class="eyebrow" style="justify-content:center;display:flex">Coming Soon</div>
+    <h2>Coming<br/><span class="grad">Soon.</span></h2>
+    <p class="cs-sub">Leadly AI is in private development. Built for freelancers and agencies who want more clients.</p>
+    <div style="display:flex;justify-content:center;margin-top:1.5rem">
+      <button class="btn btn-p btn-xl" onclick="showAuth()">Get Early Access →</button>
+    </div>
+    <p class="cs-note" style="margin-top:1rem">No credit card. No spam. Early access only.</p>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="logo" style="font-size:.9rem"><div class="logo-mark" style="width:20px;height:20px;font-size:.6rem">⚡</div>Leadly AI</div>
+    <div class="footer-links">
+      <a href="#pipeline">Pipeline</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+      <a href="#">Privacy</a>
+    </div>
+    <span style="font-size:.72rem;color:var(--d)">© 2025 Leadly AI</span>
+  </div>
+</footer>
+</div>
+
+<script src="script.js"></script>
+<script>
+const netlifyIdentity = window.netlifyIdentity;
+let currentUser = null;
+
+netlifyIdentity.init({
+  APIUrl: 'https://leadly-backend.netlify.app/.netlify/identity'
+});
+
+netlifyIdentity.on('init', user => {
+  if (user) { currentUser = user; showFormOrSite(); }
+  else { showAuthOverlay(); }
+});
+netlifyIdentity.on('login', user => {
+  currentUser = user;
+  netlifyIdentity.close();
+  showFormOrSite();
+});
+netlifyIdentity.on('logout', () => { currentUser = null; showAuthOverlay(); });
+
+function showAuthOverlay() {
+  document.getElementById('auth-overlay').classList.remove('hidden');
+  document.getElementById('form-overlay').classList.add('hidden');
+  document.getElementById('success-overlay').classList.add('hidden');
+  document.getElementById('main-site').style.display = 'none';
+}
+function showAuth() {
+  if (currentUser) showFormOverlay();
+  else showAuthOverlay();
+}
+function showFormOrSite() {
+  const joined = localStorage.getItem('leadly_joined_' + currentUser.email);
+  if (joined) showMainSite();
+  else showFormOverlay();
+}
+function showFormOverlay() {
+  document.getElementById('auth-overlay').classList.add('hidden');
+  document.getElementById('form-overlay').classList.remove('hidden');
+  document.getElementById('success-overlay').classList.add('hidden');
+  document.getElementById('main-site').style.display = 'none';
+  if (currentUser) document.getElementById('user-email-display').textContent = currentUser.email;
+}
+function showMainSite() {
+  document.getElementById('auth-overlay').classList.add('hidden');
+  document.getElementById('form-overlay').classList.add('hidden');
+  document.getElementById('success-overlay').classList.add('hidden');
+  document.getElementById('main-site').style.display = 'block';
+  updateNavAuth();
+}
+function showSite() { showMainSite(); }
+function updateNavAuth() {
+  const el = document.getElementById('nav-auth-btn');
+  if (currentUser) {
+    el.innerHTML = `<div style="display:flex;align-items:center;gap:.6rem"><span style="font-size:.78rem;color:var(--m)">${currentUser.email}</span><button class="btn btn-ghost" style="padding:.45rem 1rem;font-size:.78rem" onclick="logout()">Sign out</button></div>`;
+  } else {
+    el.innerHTML = `<button class="btn btn-p" onclick="showAuth()">Early Access</button>`;
+  }
+}
+function loginGoogle() { netlifyIdentity.open('login'); }
+function loginEmail() { netlifyIdentity.open('login'); }
+function logout() { netlifyIdentity.logout(); }
+
+async function submitWaitlist() {
+  const niche = document.getElementById('niche').value.trim();
+  const description = document.getElementById('description').value.trim();
+  const idealClients = document.getElementById('idealClients').value.trim();
+  if (!niche || !description || !idealClients) { toast('Please fill in all fields'); return; }
+  const btn = document.getElementById('submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Saving...';
+  try {
+    const res = await fetch('/.netlify/functions/save-waitlist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: currentUser.email, niche, description, idealClients })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      localStorage.setItem('leadly_joined_' + currentUser.email, '1');
+      document.getElementById('form-overlay').classList.add('hidden');
+      document.getElementById('success-overlay').classList.remove('hidden');
+    } else { throw new Error(data.error || 'Something went wrong'); }
+  } catch (err) {
+    toast(err.message || 'Failed to submit. Try again.');
+    btn.disabled = false;
+    btn.innerHTML = 'Join Waitlist →';
+  }
+}
+</script>
+</body>
+</html>
